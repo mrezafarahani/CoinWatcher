@@ -12,15 +12,29 @@ $(document).ready(function(){
         console.log(key);
         $('div.test1').text(key);
         $('div.test2').text(secret);
-        APIURL = "https://api.binance.com/api/v1/time";
-        $.getJSON(APIURL
+        var APIURLTIME = "https://api.binance.com/api/v1/time";
+        var APIACCURL = "https://api.binance.com/api/v3/account?recvWindow=60000&timestamp={0}&signature={1}";
+        serverTime = $.getJSON(APIURLTIME
         ).done(function(data){
-          $('div.test3').text(data['serverTime']);
-          serverTime = data['serverTime']
+          serverTime = data['serverTime'];
+        // serverTime = getServerTime();
+        var message = "recvWindow=60000&timestamp={0}".replace('{0}',serverTime);
+        $('div.test3').text(message);
+        var hash = CryptoJS.HmacSHA256(message, secret);
+        var signature = CryptoJS.enc.Hex.stringify(hash);
+        console.log(message);
+        console.log(signature);
+        APIACCURL = APIACCURL.replace('{0}', serverTime);
+        APIACCURL = APIACCURL.replace('{1}', signature);
+        $.ajax({
+            url: APIACCURL,
+            headers: { 'X-MBX-APIKEY': key },
+            success : function (data) {
+              $('div.test4').text(data);
+            }
         });
-        var message = "recvWindow=60000&timestamp={0}".format(serverTime);
-        var hash = CryptoJS.HmacSHA256("Message", secret).toString(CryptoJS.enc.Hex);
-        $('div.test4').text(message);
+
+        });
 
     });
 });
