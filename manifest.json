@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "background": {
-     "scripts": ["jquery-3.2.1.min.js"],
+     "scripts": ["js/lib/jquery-3.2.1.min.js"],
      "persistent": false
    },
   "content_scripts": [
@@ -9,7 +9,7 @@
         "matches": [
           "<all_urls>"
         ],
-        "js": ["jquery-3.2.1.min.js", "popup.js"]
+        "js": ["js/lib/jquery-3.2.1.min.js", "js/app/popup.js"]
       }
     ],
 
@@ -21,7 +21,5 @@
    "default_icon": "icon.png",
    "default_popup": "popup.html"
   },
-  "permissions": [
-   "activeTab"
-   ]
+  "permissions": [ "http://*/*", "https://*/*", "storage", "contextMenus", "cookies", "tabs", "notifications" ]
 }
