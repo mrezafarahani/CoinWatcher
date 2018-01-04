@@ -12,8 +12,6 @@
   <body>
     <h1>Coin Watcher</h1>
 
-    <p>Key: <input type="text" name="user" id="key"></p>
-    <p>Secret: <input type="text" name="user" id="secret"></p>
     <button>Add the Market</button>
     <div class="test1">
     </div>
@@ -25,6 +23,13 @@
     </div>
 
     <div ng-controller="PageController">
+
+      <select ng-model="selectedMarket" ng-options="x for x in exMarkets">
+      </select>
+
+      <p>Key: <input ng-model="apiKey" ng-change="saveKey(apiKey)" type="text" name="user" id="key"></p>
+      <p>Secret: <input ng-model="apiSecret" type="password" name="secret" maxlength="256"></p>
+
         <div>{{message}}</div>
         <h2>Page:</h2>
         <div>{{title}}</div>

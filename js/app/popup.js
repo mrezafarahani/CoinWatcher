@@ -2,9 +2,22 @@
 var secret = "AFSY2EiLJ3ApiJUX3u1odnHDh2M40zT0uVk5qXqFfEqrFs4Q1XzpxJ5Uq9h4kfSg";
 var key = "ZowmnxTHyjzafVtzuRLIGPgwJGnrkPOR2pXcZ0OrYo8FzlIh5hWv4oZZHNpZZ1yA";
 var serverTime = 0;
-
+if (Object.keys(localStorage).length==0){
+  console.log(Object.keys(localStorage).length);
+  localStorage.setItem("key", "dfd");
+  console.log(Object.keys(localStorage).length);
+}
 myApp.controller("PageController", function ($scope) {
     $scope.message = "Hello from AngularJS";
+    $scope.exMarkets = ["Binance", "Bitrex"];
+    $scope.apiTokens = [];
+    if ("keyt" in localStorage){
+      $scope.apiKey = localStorage["keyt"];
+    }
+    $scope.saveKey = function(apiKey){
+      localStorage.setItem("keyt", apiKey);
+      console.log(localStorage["key"]);
+    };
 
 
         $scope.title = "title";
