@@ -31,7 +31,7 @@ myApp.controller("PageController", function ($scope, $http) {
         $http(req)
               .then(function(response) {
                   for(i=0; i<response.data['balances'].length; i++){
-                    total = parseFloat(response.data['balances'][i]['free']) + parseFloat(response.data['balances'][i]['locked'])
+                    total = parseFloat(response.data['balances'][i]['asset']) + parseFloat(response.data['balances'][i]['locked'])
                     if(total>0){
                       $scope.balances.push(response.data['balances'][i]);
                     }
