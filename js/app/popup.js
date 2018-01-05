@@ -2,64 +2,79 @@
 var secret = "AFSY2EiLJ3ApiJUX3u1odnHDh2M40zT0uVk5qXqFfEqrFs4Q1XzpxJ5Uq9h4kfSg";
 var key = "ZowmnxTHyjzafVtzuRLIGPgwJGnrkPOR2pXcZ0OrYo8FzlIh5hWv4oZZHNpZZ1yA";
 var serverTime = 0;
-if (Object.keys(localStorage).length==0){
-  console.log(Object.keys(localStorage).length);
-  localStorage.setItem("key", "dfd");
-  console.log(Object.keys(localStorage).length);
-}
-myApp.controller("PageController", function ($scope) {
-    $scope.message = "Hello from AngularJS";
-    $scope.exMarkets = ["Binance", "Bitrex"];
-    $scope.apiTokens = [];
-    if ("keyt" in localStorage){
-      $scope.apiKey = localStorage["keyt"];
-    }
-    $scope.saveKey = function(apiKey){
-      localStorage.setItem("keyt", apiKey);
-      console.log(localStorage["key"]);
+var APIURLTIME = "https://api.binance.com/api/v1/time";
+var APIACCURL = "https://api.binance.com/api/v3/account?recvWindow=60000&timestamp={0}&signature={1}";
+// if (Object.keys(localStorage).length==0){
+//   console.log(Object.keys(localStorage).length);
+//   localStorage.setItem("key", "dfd");
+//   console.log(Object.keys(localStorage).length);
+// }
+myApp.controller("PageController", function ($scope, $http) {
+  $scope.callBinance = function(){
+    $scope.message = APIURLTIME;
+    $http.get(APIURLTIME).success(function(response) {
+        serverTime = response['serverTime'];
+        var message = "recvWindow=60000&timestamp={0}".replace('{0}',serverTime);
+        var hash = CryptoJS.HmacSHA256(message, $scope.apiSecret);
+        var signature = CryptoJS.enc.Hex.stringify(hash);
+        var URLCall = APIACCURL.replace('{0}', serverTime);
+        URLCall = URLCall.replace('{1}', signature);
+        var req = {
+           method: 'GET',
+           url: URLCall,
+           headers: {'X-MBX-APIKEY': 'ZowmnxTHyjzafVtzuRLIGPgwJGnrkPOR2pXcZ0OrYo8FzlIh5hWv4oZZHNpZZ1yA'}
+           // ,data: { test: 'test' }
+         };
+         $scope.balances = [];
+         var total = 0;
+
+        $http(req)
+              .then(function(response) {
+                  for(i=0; i<response.data['balances'].length; i++){
+                    total = parseFloat(response.data['balances'][i]['free']) + parseFloat(response.data['balances'][i]['locked'])
+                    if(total>0){
+                      $scope.balances.push(response.data['balances'][i]);
+                    }
+                  }
+                  // $scope.message = response.data['balances'];
+                  // {asset: "BTC", free: "0.09878964", locked: "0.00000000"}
+              });
+      });
     };
 
-
-        $scope.title = "title";
-        $scope.url = "url";
-        $scope.pageInfos = "infopageInfos";
-});
-
-$(document).ready(function(){
-    $("button").click(function(){
-      if($('#key').val())
-      {
-        key = $('#key').val();
+    $scope.showKeyField = false;
+    $scope.showSecretField = false;
+    // $scope.message = "Hello from AngularJS";
+    $scope.exMarkets = ["Binance", "Bitrex"];
+    $scope.apiTokens = [];
+    if ("apiKey" in localStorage){
+      $scope.apiKey = localStorage["apiKey"];
+    }
+    else {
+      $scope.apiKey = "Enter Api Key";
+    }
+    $scope.saveKey = function(apiKey){
+      localStorage.setItem("apiKey", apiKey);
+      // console.log(localStorage["key"]);
+    };
+    $scope.showFields = function(selectedMarket){
+      if (selectedMarket=="Binance"){
+        $scope.showKeyField = true;
+        $scope.showSecretField = true;
       }
-        secret = $('#secret').val();
-        console.log(key);
-        $('div.test1').text(key);
-        $('div.test2').text(secret);
-        var APIURLTIME = "https://api.binance.com/api/v1/time";
-        var APIACCURL = "https://api.binance.com/api/v3/account?recvWindow=60000&timestamp={0}&signature={1}";
-        serverTime = $.getJSON(APIURLTIME
-        ).done(function(data){
-          serverTime = data['serverTime'];
-        // serverTime = getServerTime();
-        var message = "recvWindow=60000&timestamp={0}".replace('{0}',serverTime);
-        $('div.test3').text(message);
-        var hash = CryptoJS.HmacSHA256(message, secret);
-        var signature = CryptoJS.enc.Hex.stringify(hash);
-        console.log(message);
-        console.log(signature);
-        APIACCURL = APIACCURL.replace('{0}', serverTime);
-        APIACCURL = APIACCURL.replace('{1}', signature);
-        $.ajax({
-            url: APIACCURL,
-            headers: { 'X-MBX-APIKEY': key },
-            success : function (data) {
-              $('div.test4').text(data['balances'][0]['asset'] + " : " + data['balances'][0]['free']);
-            }
-        });
+      else if (selectedMarket=="reset") {
+        $scope.showKeyField = false;
+        $scope.showSecretField = false;
+        $scope.selectedMarket = null;
+      }
+      // console.log(localStorage["key"]);
+    };
 
-        });
+    $scope.submitFields = function(){
+      localStorage.setItem("apiSecret", $scope.apiSecret);
+      localStorage.setItem("Binance", [$scope.apiKey, $scope.apiSecret]);
+      $scope.callBinance();
+      $scope.showFields('reset')
+    }
 
-    });
 });
-// secret  = AFSY2EiLJ3ApiJUX3u1odnHDh2M40zT0uVk5qXqFfEqrFs4Q1XzpxJ5Uq9h4kfSg
-// key = ZowmnxTHyjzafVtzuRLIGPgwJGnrkPOR2pXcZ0OrYo8FzlIh5hWv4oZZHNpZZ1yA

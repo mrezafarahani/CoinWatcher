@@ -2,6 +2,7 @@
 <html ng-app="CoinWatcher" ng-csp>
   <head>
     <title>Coin Watcher</title>
+    <link rel="stylesheet" href="css/angular-csp.css">
     <script src="js/lib/jquery-3.2.1.min.js"></script>
     <script src="js/lib/angular.min.js"></script>
     <script src="js/app/app.js"></script>
@@ -12,7 +13,6 @@
   <body>
     <h1>Coin Watcher</h1>
 
-    <button>Add the Market</button>
     <div class="test1">
     </div>
     <div class="test2">
@@ -23,17 +23,30 @@
     </div>
 
     <div ng-controller="PageController">
-
-      <select ng-model="selectedMarket" ng-options="x for x in exMarkets">
+<p>
+      <select ng-model="selectedMarket" ng-options="x for x in exMarkets" ng-change="showFields(selectedMarket)">
       </select>
+      </p>
+      <div ng-show="showKeyField">
+          <p>Key: <input ng-model="apiKey" ng-change="saveKey(apiKey)" type="text" name="user" id="key"></p>
+      </div>
+      <div ng-show="showSecretField">
+          <p>Secret: <input ng-model="apiSecret" type="password" name="secret" maxlength="256"></p>
+      </div>
 
-      <p>Key: <input ng-model="apiKey" ng-change="saveKey(apiKey)" type="text" name="user" id="key"></p>
-      <p>Secret: <input ng-model="apiSecret" type="password" name="secret" maxlength="256"></p>
+      <button ng-click="submitFields()">Add the Market</button>
 
-        <div>{{message}}</div>
-        <h2>Page:</h2>
-        <div>{{title}}</div>
-        <div>{{url}}</div>
+
+      <table>
+          <tr><td>asset</td><td>free</td><td>locked</td></tr>
+          <tr ng-repeat="i in balances">
+             <td>{{i.asset}}</td>
+             <td>{{i.free}}</td>
+             <td>{{i.locked}}</td>
+           </tr>
+        </tbody>
+      </table>
+
     </div>
   </body>
 </html>
