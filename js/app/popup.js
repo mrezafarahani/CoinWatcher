@@ -2,6 +2,7 @@
 var serverTime = 0;
 var APIURLTIME = "https://api.binance.com/api/v1/time";
 var APIACCURL = "https://api.binance.com/api/v3/account?recvWindow=60000&timestamp={0}&signature={1}";
+var PRICEURL = "https://api.binance.com/api/v1/ticker/allPrices"
 // if (Object.keys(localStorage).length==0){
 //   console.log(Object.keys(localStorage).length);
 //   localStorage.setItem("key", "dfd");
@@ -10,6 +11,13 @@ var APIACCURL = "https://api.binance.com/api/v3/account?recvWindow=60000&timesta
 myApp.controller("PageController", function ($scope, $http) {
   $scope.callBinance = function(key, secret){
     $scope.message = APIURLTIME;
+    var prices = [];
+    $http.get(PRICEURL).then(function(res){
+      for(i=0; i<res.data.length;i++){
+        prices[res.data[i].symbol]=res.data[i].price;
+      }
+      console.log(prices);
+    });
     $http.get(APIURLTIME).success(function(response) {
         serverTime = response['serverTime'];
         var message = "recvWindow=60000&timestamp={0}".replace('{0}',serverTime);
@@ -31,7 +39,14 @@ myApp.controller("PageController", function ($scope, $http) {
                   for(i=0; i<response.data['balances'].length; i++){
                     total = parseFloat(response.data['balances'][i]['free']) + parseFloat(response.data['balances'][i]['locked'])
                     if(total>0){
-                      $scope.balances.push(response.data['balances'][i]);
+                      if(response.data['balances'][i]['asset']=='ETH'){
+                        ethTotal = total;
+                      }
+                      else {
+                        ethTotal = total * prices[response.data['balances'][i]['asset']+"ETH"];
+                      }
+                      var price = 0;
+                      $scope.balances.push(Object.assign({}, response.data['balances'][i], {"ethval": ethTotal}));
                     }
                   }
                   // $scope.message = response.data['balances'];
