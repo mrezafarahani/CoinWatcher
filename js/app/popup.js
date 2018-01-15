@@ -32,7 +32,9 @@ myApp.controller("PageController", function ($scope, $http) {
            // ,data: { test: 'test' }
          };
          $scope.balances = [];
+         var ethTotal= 0;
          var total = 0;
+         var assetData = [];
 
         $http(req)
               .then(function(response) {
@@ -40,17 +42,32 @@ myApp.controller("PageController", function ($scope, $http) {
                     total = parseFloat(response.data['balances'][i]['free']) + parseFloat(response.data['balances'][i]['locked'])
                     if(total>0){
                       if(response.data['balances'][i]['asset']=='ETH'){
-                        ethTotal = total;
+                        ethEquv = total;
+                      }
+                      else if (response.data['balances'][i]['asset']=='BTC') {
+                        ethEquv = total / prices["ETHBTC"];
+                      }
+                      else if (response.data['balances'][i]['asset']=='GAS') {
+                        ethEquv = 0;
                       }
                       else {
-                        ethTotal = total * prices[response.data['balances'][i]['asset']+"ETH"];
+                        ethEquv = total * prices[response.data['balances'][i]['asset']+"ETH"];
+                      }
+                      if(ethEquv<0.001){
+                        continue;
                       }
                       var price = 0;
-                      $scope.balances.push(Object.assign({}, response.data['balances'][i], {"ethval": ethTotal}));
+                      ethTotal += ethEquv;
+                      ethEquv = ethEquv.toFixed(5);
+                      assetData = response.data['balances'][i];
+                      assetData['free'] = parseFloat(assetData['free']).toFixed(4);
+                      assetData['locked'] = parseFloat(assetData['locked']).toFixed(4);
+                      // response.data['balances'][i]['free'] = response.data['balances'][i]['free'].toFixed(5);
+                      $scope.balances.push(Object.assign({}, assetData, {"ethval": ethEquv}));
                     }
                   }
-                  // $scope.message = response.data['balances'];
-                  // {asset: "BTC", free: "0.09878964", locked: "0.00000000"}
+                  $scope.ethTotal = ethTotal.toFixed(3);
+                  $scope.usdtTotal = (ethTotal * prices["ETHUSDT"]).toFixed(2);
               });
       });
     };
@@ -58,7 +75,7 @@ myApp.controller("PageController", function ($scope, $http) {
     $scope.showKeyField = false;
     $scope.showSecretField = false;
     // $scope.message = "Hello from AngularJS";
-    $scope.exMarkets = ["Binance", "Bitrex"];
+    $scope.exMarkets = ["Binance", "Bittrex"];
     $scope.apiTokens = [];
 
     if("Binance" in localStorage){
@@ -77,7 +94,7 @@ myApp.controller("PageController", function ($scope, $http) {
       // console.log(localStorage["key"]);
     };
     $scope.showFields = function(selectedMarket){
-      if (selectedMarket=="Binance"){
+      if (selectedMarket=="Binance" || selectedMarket=="Bittrex"){
         $scope.showKeyField = true;
         $scope.showSecretField = true;
       }

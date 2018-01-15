@@ -47,10 +47,22 @@
              </tr>
           </tbody>
         </table>
+        <div>
+          <p>Total ETH Value: {{ethTotal}} </p>
+          <p>Total USD Value: {{usdtTotal}} </p>
+        </div>
       </div>
       <div>
         <button ng-click="callBinance()">Refresh</button>
       </div>
+      <div>
+
+        <p><input type="checkbox" ng-model="donWallets"> Show donation wallets</p>
+      <div ng-show="donWallets">
+        <p> ETH: 0xE17503c95165c24Bd77d15a6CC09f482F36aF5b7 </p>
+        <p> LTC: LSnWaB1577LVEaf5Nw7tBwGbErxCzNhxMv</p>
+      </div>
+       </div>
 
     </div>
   </body>
