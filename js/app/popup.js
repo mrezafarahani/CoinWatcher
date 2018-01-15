@@ -1,5 +1,7 @@
 // popup.js
 var serverTime = 0;
+var binanceToken = false;
+var bittrexToken = false;
 var APIURLTIME = "https://api.binance.com/api/v1/time";
 var APIACCURL = "https://api.binance.com/api/v3/account?recvWindow=60000&timestamp={0}&signature={1}";
 var PRICEURL = "https://api.binance.com/api/v1/ticker/allPrices"
@@ -70,18 +72,41 @@ myApp.controller("PageController", function ($scope, $http) {
                   $scope.usdtTotal = (ethTotal * prices["ETHUSDT"]).toFixed(2);
               });
       });
-    };
+    }
+    $scope.showMarket = function(market){
+      if(market=='Binance'){
+        if("Binance" in localStorage){
+          binanceToken = true;
+          $scope.apiKey = localStorage["apiKey"];
+          var tokens = JSON.parse(localStorage.Binance);
+          $scope.callBinance(tokens.key, tokens.secret);
+          $scope.showKeyField = false;
+          $scope.showSecretField = false;
+          $scope.selectedMarket = "Binance";
+        }
+        else if ("Bittrex") {
+          if("BittrexAvailable" in localStorage){
+            var tokens = JSON.parse(localStorage.Bittrex);
+            $scope.callBittrex(tokens.key, tokens.secret);
+          }
 
+        }
+        else {
+          $scope.showKeyField = true;
+          $scope.showSecretField = true;
+          $scope.balances = [];
+        }
+      }
+    }
     $scope.showKeyField = false;
     $scope.showSecretField = false;
     // $scope.message = "Hello from AngularJS";
     $scope.exMarkets = ["Binance", "Bittrex"];
     $scope.apiTokens = [];
 
-    if("Binance" in localStorage){
-      var tokens = JSON.parse(localStorage.Binance);
-      $scope.callBinance(tokens.key, tokens.secret);
-    }
+
+    $scope.showMarket("Binance");
+
 
     if ("apiKey" in localStorage){
       $scope.apiKey = localStorage["apiKey"];
@@ -94,24 +119,30 @@ myApp.controller("PageController", function ($scope, $http) {
       // console.log(localStorage["key"]);
     };
     $scope.showFields = function(selectedMarket){
-      if (selectedMarket=="Binance" || selectedMarket=="Bittrex"){
-        $scope.showKeyField = true;
-        $scope.showSecretField = true;
+      if (selectedMarket=="Binance"){
+        $scope.showMarket("Binance");
+      }
+      else if (selectedMarket=="Bittrex") {
+        $scope.showMarket("Bittrex");
       }
       else if (selectedMarket=="reset") {
         $scope.showKeyField = false;
         $scope.showSecretField = false;
         $scope.selectedMarket = null;
       }
+      else {
+        $scope.showKeyField = false;
+        $scope.showSecretField = false;
+      }
       // console.log(localStorage["key"]);
     };
 
     $scope.submitFields = function(){
-      localStorage.setItem("apiSecret", $scope.apiSecret);
+      // localStorage.setItem("apiSecret", $scope.apiSecret);
+      localStorage.setItem($scope.selectedMarket + "Available", true);
       var exchangeKeys = {"key":$scope.apiKey, "secret":$scope.apiSecret}
-      localStorage.setItem("Binance", JSON.stringify(exchangeKeys));
-      $scope.callBinance($scope.apiKey, $scope.apiSecret);
-      $scope.showFields('reset')
+      localStorage.setItem($scope.selectedMarket, JSON.stringify(exchangeKeys));
+      $scope.showMarket($scope.selectedMarket);
     }
 
 });
