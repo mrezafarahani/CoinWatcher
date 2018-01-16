@@ -3,18 +3,19 @@ var serverTime = 0;
 var binanceToken = false;
 var bittrexToken = false;
 var APIURLTIME = "https://api.binance.com/api/v1/time";
-var APIACCURL = "https://api.binance.com/api/v3/account?recvWindow=60000&timestamp={0}&signature={1}";
-var PRICEURL = "https://api.binance.com/api/v1/ticker/allPrices"
+var BINAPIACCURL = "https://api.binance.com/api/v3/account?recvWindow=60000&timestamp={0}&signature={1}";
+var BINPRICEURL = "https://api.binance.com/api/v1/ticker/allPrices"
 // if (Object.keys(localStorage).length==0){
 //   console.log(Object.keys(localStorage).length);
 //   localStorage.setItem("key", "dfd");
 //   console.log(Object.keys(localStorage).length);
 // }
 myApp.controller("PageController", function ($scope, $http) {
+
   $scope.callBinance = function(key, secret){
     $scope.message = APIURLTIME;
     var prices = [];
-    $http.get(PRICEURL).then(function(res){
+    $http.get(BINPRICEURL).then(function(res){
       for(i=0; i<res.data.length;i++){
         prices[res.data[i].symbol]=res.data[i].price;
       }
@@ -25,7 +26,7 @@ myApp.controller("PageController", function ($scope, $http) {
         var message = "recvWindow=60000&timestamp={0}".replace('{0}',serverTime);
         var hash = CryptoJS.HmacSHA256(message, secret);
         var signature = CryptoJS.enc.Hex.stringify(hash);
-        var URLCall = APIACCURL.replace('{0}', serverTime);
+        var URLCall = BINAPIACCURL.replace('{0}', serverTime);
         URLCall = URLCall.replace('{1}', signature);
         var req = {
            method: 'GET',
@@ -73,6 +74,12 @@ myApp.controller("PageController", function ($scope, $http) {
               });
       });
     }
+    // End of callBinance
+  $scope.callBittrex = function(key, secret){
+    
+  }
+
+
     $scope.showMarket = function(market){
       if(market=='Binance'){
         if("Binance" in localStorage){
@@ -84,18 +91,23 @@ myApp.controller("PageController", function ($scope, $http) {
           $scope.showSecretField = false;
           $scope.selectedMarket = "Binance";
         }
-        else if ("Bittrex") {
-          if("BittrexAvailable" in localStorage){
-            var tokens = JSON.parse(localStorage.Bittrex);
-            $scope.callBittrex(tokens.key, tokens.secret);
-          }
-
-        }
         else {
           $scope.showKeyField = true;
           $scope.showSecretField = true;
           $scope.balances = [];
         }
+      }
+      else if (market=="Bittrex") {
+        if("BittrexAvailable" in localStorage){
+          var tokens = JSON.parse(localStorage.Bittrex);
+          $scope.callBittrex(tokens.key, tokens.secret);
+        }
+        else{
+          $scope.showKeyField = true;
+          $scope.showSecretField = true;
+          $scope.balances = [];
+        }
+
       }
     }
     $scope.showKeyField = false;
